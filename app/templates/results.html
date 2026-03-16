@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Search{% if query %} — {{ query }}{% endif %}{% endblock %}
+{% block content %}
+  <p class="results-meta">{{ results|length }} result{{ 's' if results|length != 1 else '' }}{% if query %} for "{{ query }}"{% endif %}</p>
+
+  <ul class="results-list">
+    {% for entry in results %}
+    <li>
+      <div class="result-card">
+        <div class="result-headword">
+          <span class="result-hanzi">{{ entry.simplified }}</span>
+          <div class="result-pinyin">{{ entry.pinyin_toned }}</div>
+          {% if entry.traditional != entry.simplified %}
+          <div class="result-traditional">{{ entry.traditional }}</div>
+          {% endif %}
+        </div>
+        <div class="result-definitions">
+          {% for def in entry.definitions.split('/') %}
+          {% if def.strip() %}
+          <div class="definition-item"><span class="def-number">{{ loop.index }}.</span> {{ def.strip() }}</div>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

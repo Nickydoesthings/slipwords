@@ -1,0 +1,38 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Python virtual environment
+venv/
+env/
+.venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Database
+*.db
+
+# IDEs
+.vscode/
+
+
+# Cursor specific
+.cursor/
+
+# Logs
+*.log
+logs/
+
+# pytest cache
+.pytest_cache/
+
+
+# Local configuration files that might contain secrets
+config.local.py
+secrets.py

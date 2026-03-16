@@ -1,0 +1,10 @@
+- This is a Chinese-English dictionary web app called Slipwords.
+- Backend: FastAPI (Python 3.11+). Always use type hints.
+- Templating: Jinja2 (server-rendered HTML). Do not introduce React, Vue, or any JS framework.
+- Database: PostgreSQL via SQLAlchemy ORM. Schema is defined in docs/DATA.md and app/models.py.
+- Keep functions small and single-purpose. Add a one-line docstring to every function.
+- Do not add new Python dependencies without flagging it explicitly.
+- Do not generate code that modifies the database schema without being explicitly asked.
+- Search logic lives in search.py only. Do not put query construction in main.py.
+- Always explain generated code. You don't have to explain every line.
+- When generating SQL or ORM queries, always consider whether an index exists for the column being searched (see DATA.md).

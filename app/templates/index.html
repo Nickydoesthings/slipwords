@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Slipwords{% endblock %}
+{% block content %}
+  <section class="homepage-hero">
+    <h1>Slipwords</h1>
+    <p>Enter Chinese characters, pinyin (with spaces between syllables), or English in the search bar above.</p>
+    <p class="search-examples-label">Examples:</p>
+    <ul class="search-examples">
+      <li><a href="/search?q={{ '学习' | urlencode }}">学习</a></li>
+      <li><a href="/search?q={{ 'xue xi' | urlencode }}">xue xi</a></li>
+      <li><a href="/search?q={{ 'to study' | urlencode }}">to study</a></li>
+    </ul>
+  </section>
+{% endblock %}
