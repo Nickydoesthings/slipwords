@@ -39,6 +39,8 @@ This is the only table for v1.
 | `pinyin_bare` | `TEXT NOT NULL` | Pinyin with all tone marks and numbers stripped, lowercase (e.g. xue xi). Used for bare pinyin search. |
 | `definitions` | `TEXT NOT NULL` | Raw definitions string from CC-CEDICT, stored as slash-separated (e.g. "to learn/to study"). Split on display. |
 | `is_variant` | `BOOLEAN DEFAULT FALSE` | True if CC-CEDICT marks this entry as a variant/alternate form. Useful for de-prioritizing in results. |
+| `freq_log`        | `DOUBLE PRECISION`      | Optional SUBTLEX-CH log word frequency for the simplified form. Higher = more frequent. May be NULL. |
+
 
 ### Indexes
 
@@ -66,6 +68,8 @@ CREATE TABLE entries (
     pinyin_bare TEXT NOT NULL,
     definitions TEXT NOT NULL,
     is_variant BOOLEAN DEFAULT FALSE
+    freq_log DOUBLE PRECISION
+
 );
 
 CREATE INDEX idx_simplified ON entries(simplified);
@@ -94,13 +98,12 @@ Store as-is from CC-CEDICT (slash-separated string). Split into a list only at d
 
 ---
 
-## Future Data Sources (not in v1)
+### Frequency data (SUBTLEX-CH)
+We enrich some entries with word frequency information from **SUBTLEX-CH** (film/TV subtitle corpus):
+- Source: SUBTLEX-CH word frequency list (`SUBTLEX-CH-WF`).
+- Join key: simplified word form (SUBTLEX-CH is simplified-only).
+- Column: `freq_log` stores the published `logW` value (log word frequency). Higher = more frequent in the subtitle corpus.
 
-These can be added as new columns on `entries` or as new joined tables later. Each uses hanzi as the linking key.
+---
 
-| Feature | Data Source |
-|---|---|
-| HSK level | HSK 2.0 and 3.0 word lists (freely available) |
-| Character frequency | Jun Da's character frequency list |
-| Stroke order | Wikimedia Commons SVG stroke order data |
-| Radical decomposition | Unicode Unihan database |
+

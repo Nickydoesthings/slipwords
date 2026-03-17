@@ -55,7 +55,8 @@ def numbered_to_tone_marks(pinyin: str) -> str:
 
     # Convert a single numbered pinyin syllable to a tone-marked pinyin syllable.
     def convert_syllable(syl: str) -> str:
-        m = re.match(r"^([a-züv]+)([1-5])$", syl)
+        # Allow an initial capital (e.g. "Bei3") and mixed case.
+        m = re.match(r"^([A-Za-züvÜV]+)([1-5])$", syl)
         if not m:
             return syl
         base, tone_str = m.groups()
@@ -67,9 +68,12 @@ def numbered_to_tone_marks(pinyin: str) -> str:
         # Tone placement priority: a, e, ou; otherwise last vowel
         vowels = "aeiouüv"
         idx = -1
-        for ch in base:
-            if ch in "aeA E":  # force on a or e if present
-                idx = base.lower().find(ch.lower())
+        # Force tone mark onto 'a' or 'e' if present in the syllable.
+        base_lower = base.lower()
+        for target in ("a", "e"):
+            pos = base_lower.find(target)
+            if pos != -1:
+                idx = pos
                 break
 
         if idx == -1:
