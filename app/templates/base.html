@@ -4,11 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Slipwords{% endblock %} — Chinese–English Dictionary</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <!-- Cache-bust querystring so CSS edits are reflected immediately in the browser. -->
+  <link rel="stylesheet" href="/static/style.css?v=3">
 </head>
 <body>
   <header class="site-header">
-    <a href="/" class="site-logo">slipwords</a>
+    <a href="/" class="site-logo">SlipWords</a>
     <form class="search-form" action="/search" method="get" role="search">
       <input class="search-input" type="text" name="q" placeholder="Search in Chinese, pinyin, or English…" value="{{ request.query_params.get('q', '') }}" aria-label="Search">
       <button class="search-btn" type="submit">Search</button>

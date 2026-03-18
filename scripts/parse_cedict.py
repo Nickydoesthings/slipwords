@@ -43,6 +43,9 @@ def parse_line(line: str) -> tuple[str, str, str, str, str, bool]:
 def numbered_to_tone_marks(pinyin: str) -> str:
     """Convert numbered pinyin (xue2 xi2) to tone-mark pinyin (xué xí)."""
     # Adapted from common pinyin tone placement rules.
+    # Some CEDICT-like sources encode ü as "u:" (e.g. "lu:3"). Normalize that to
+    # the more common "v" form before converting tone marks.
+    pinyin = pinyin.replace("u:", "v").replace("U:", "V")
     tone_map = {
         "a": "āáǎàa",
         "e": "ēéěèe",

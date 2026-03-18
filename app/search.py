@@ -19,6 +19,44 @@ _CJK_RE = re.compile(r"[\u4e00-\u9fff]")
 # Unicode tone-marked vowels (used to detect "toned pinyin" input).
 _TONE_MARKS = "āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ"
 
+# Fullwidth ":" variant often seen after "CL".
+_CL_RE = re.compile(r"^CL[:：]\s*", flags=re.IGNORECASE)
+
+# Common proper-name fragment used for simplified/traditional variants:
+# - 黔東南州|黔东南州[Qian2 dong1 nan2 zhou1]
+# - 黔東南州|黔东南州
+_PROPER_NAME_HANZI_VARIANT_PAIR_RE = re.compile(
+    r"[\u4e00-\u9fff]+\|[\u4e00-\u9fff]+(?:\[[^\]]+\])?"
+)
+
+def _clean_definitions_for_display(definitions: str) -> str:
+    """
+    Clean up definition segments for readability (v1).
+
+    - Drop classifier fragments like "CL:次[ci4]"
+    - Remove common proper-name chunks like "X|Y[Z]" embedded in English glosses
+    """
+    cleaned: list[str] = []
+    for seg in definitions.split("/"):
+        d = seg.strip()
+        if not d:
+            continue
+        if _CL_RE.match(d):
+            continue
+
+        # Drop the redundant simplified/traditional hanzi pair.
+        d = _PROPER_NAME_HANZI_VARIANT_PAIR_RE.sub("", d)
+
+        # Clean whitespace and punctuation spacing after deletions.
+        d = re.sub(r"\s+([,，])", r"\1", d)
+        d = re.sub(r"^[,，]\s*", "", d)
+        d = re.sub(r"\s{2,}", " ", d).strip()
+
+        if d:
+            cleaned.append(d)
+
+    return "/".join(cleaned)
+
 
 def _has_chinese(s: str) -> bool:
     """Return True if string contains at least one Chinese character."""
@@ -89,16 +127,21 @@ def search_hanzi(session: Session, q: str, limit: int = MAX_RESULTS) -> list[Ent
 
 def search_toned_pinyin(session: Session, q: str, limit: int = MAX_RESULTS) -> list[Entry]:
     """
-    Search by pinyin with tone marks. Exact matches first, then contains.
+    Search by pinyin with tone marks. Exact matches first, then token-boundary sequence matches.
     Within each group, more frequent words (freq_log) are preferred.
     """
-    q = q.strip()
+    # Normalize whitespace so that user input like "xue  xi" still matches stored "xue xi".
+    q = " ".join(q.strip().split())
     stmt = (
         select(Entry)
         .where(
             or_(
                 Entry.pinyin_toned == q,
-                Entry.pinyin_toned.contains(q),
+                # Token-aware matching: require the query to appear as a full syllable
+                # sequence in the space-delimited pinyin field (prevents "xi" matching "xian").
+                Entry.pinyin_toned.like(f"{q} %"),
+                Entry.pinyin_toned.like(f"% {q} %"),
+                Entry.pinyin_toned.like(f"% {q}"),
             )
         )
         .order_by(
@@ -113,16 +156,21 @@ def search_toned_pinyin(session: Session, q: str, limit: int = MAX_RESULTS) -> l
 
 def search_bare_pinyin(session: Session, q: str, limit: int = MAX_RESULTS) -> list[Entry]:
     """
-    Search by bare pinyin (no tones). Normalize to lowercase; exact match first, then contains.
+    Search by bare pinyin (no tones). Normalize to lowercase; exact matches first, then token-boundary sequence matches.
     Within each group, more frequent words (freq_log) are preferred.
     """
-    q = q.strip().lower()
+    # Normalize whitespace so that user input like "xi  shi" still matches stored "xi shi".
+    q = " ".join(q.strip().lower().split())
     stmt = (
         select(Entry)
         .where(
             or_(
                 Entry.pinyin_bare == q,
-                Entry.pinyin_bare.contains(q),
+                # Token-aware matching: require the query to appear as a full syllable
+                # sequence in the space-delimited pinyin field (prevents "xi" matching "xian").
+                Entry.pinyin_bare.like(f"{q} %"),
+                Entry.pinyin_bare.like(f"% {q} %"),
+                Entry.pinyin_bare.like(f"% {q}"),
             )
         )
         .order_by(
@@ -200,4 +248,12 @@ def run_search(session: Session, query: str) -> tuple[list[Entry], Literal["hanz
         results = search_bare_pinyin(session, query)
     else:
         results = search_definitions_fts(session, query)
+
+    # v1 display cleanup:
+    # - Clean definition fragments (drop CL:... and some embedded proper-name redundancy)
+    for entry in results:
+        definitions = getattr(entry, "definitions", "")
+        if isinstance(definitions, str):
+            entry.definitions = _clean_definitions_for_display(definitions)
+
     return results, qtype
