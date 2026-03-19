@@ -11,7 +11,7 @@
   <header class="site-header">
     <a href="/" class="site-logo">SlipWords</a>
     <form class="search-form" action="/search" method="get" role="search">
-      <input class="search-input" type="text" name="q" placeholder="Search in Chinese, pinyin, or English…" value="{{ request.query_params.get('q', '') }}" aria-label="Search">
+      <input class="search-input" type="text" name="q" maxlength="64" placeholder="Search in Chinese, pinyin, or English…" value="{{ request.query_params.get('q', '') }}" aria-label="Search">
       <button class="search-btn" type="submit">Search</button>
     </form>
   </header>
