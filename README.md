@@ -1,4 +1,4 @@
-SlipWords is a Chinese-English dictionary built in the browse. It's lightweight, fast, and easy to use.
+SlipWords is a Chinese-English dictionary built in the browser. It's lightweight, fast, and easy to use.
 Search with English, marked and unmarked pinyin, or hanzi. 
 
 The main datasources are [CC_CEDICT](https://cc-cedict.org/wiki/) (dictionary source) and [SUBTLEX-CH](https://www.ugent.be/pp/experimentele-psychologie/en/research/documents/subtlexch) (frequency data for ranking results).
